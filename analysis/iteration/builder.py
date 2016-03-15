@@ -1,6 +1,8 @@
 import logging
 import threading
 import time
+import sqlite3
+import traceback
 
 class Task:
     def validate(self):
@@ -12,9 +14,10 @@ class Task:
     def cleanup(self):
         pass
 
-class Build:
+class Builder:
     def __init__(self):
         self.tasks = {}
+        self.logger = logging.getLogger('Builder')
 
     def add_task(self, name, task, dependencies):
         if name in self.tasks:
@@ -40,25 +43,40 @@ class Build:
 
         return list(reversed(queue))
 
+    def _validate(self, task):
+        try:
+            return task.validate()
+        except Exception as e:
+            traceback.print_exc()
+            return False
+
+    def _perform(self, task):
+        try:
+            return task.perform()
+        except Exception as e:
+            traceback.print_exc()
+            return False
+
     def build(self, name, nthreads):
         if not name in self.tasks:
             raise RuntimeError('Task "%s" is not registered' % name)
 
-        logging.info('Starting build for "%s"' % name)
+        self.logger.info('Starting build for "%s"' % name)
 
         pending = self._build_queue(name)
         finished = set()
 
         for name in pending:
-            if self.tasks[name][0].validate() and finished.issuperset(set(self.tasks[name][1])):
+            if self._validate(self.tasks[name][0]) and finished.issuperset(set(self.tasks[name][1])):
                 finished.add(name)
 
         for name in finished:
             pending.remove(name)
 
-        logging.info('Skipping %d tasks.' % len(finished))
+        self.logger.info('Skipping %d tasks.' % len(finished))
 
         threads = {}
+        failures = set()
 
         while len(pending) > 0 or len(threads) > 0:
             dead = [name for name in threads if not threads[name].is_alive()]
@@ -68,11 +86,11 @@ class Build:
                 finished.add(name)
                 del threads[name]
 
-                if task.validate():
-                    logging.info('Done performing task "%s"!' % name)
+                if self._validate(task):
+                    self.logger.info('Done performing task "%s"!' % name)
                 else:
-                    logging.error('Task "%s" failed!' % name)
-                    return False
+                    self.logger.error('Task "%s" failed!' % name)
+                    failures.add(name)
 
             if len(pending) > 0 and len(threads) < nthreads:
                 available = [name for name in pending if finished.issuperset(set(self.tasks[name][1]))]
@@ -81,38 +99,19 @@ class Build:
                     name = available.pop()
                     pending.remove(name)
 
-                    threads[name] = threading.Thread(target = self.tasks[name][0].perform)
-                    threads[name].daemon = True
+                    failed_deps = failures.intersection(set(self.tasks[name][1]))
+                    if len(failed_deps) > 0:
+                        self.logger.info('Skipping "%s" due to failed dependency "%s"' % (name, ','.join(failed_deps)))
+                        finished.add(name)
+                        failures.add(name)
+                    else:
+                        threads[name] = threading.Thread(target = self._perform, args = (self.tasks[name][0],))
+                        threads[name].daemon = True
 
-                    logging.info('Performing task "%s" ...' % name)
-                    threads[name].start()
+                        logging.info('Performing task "%s" ...' % name)
+                        threads[name].start()
 
-            if len(pending) > 0 and len(threads) == 0:
+            if len(pending) > 0 and len(threads) == nthreads:
                 time.sleep(1.0)
 
         return True
-
-class PrintTask(Task):
-    def __init__(self, message, sleep, initial):
-        self.message = message
-        self.sleep = sleep
-        self.status = initial
-
-    def validate(self):
-        return self.status
-
-    def perform(self):
-        time.sleep(self.sleep)
-        print("Message: %s" % self.message)
-        self.status = True
-
-if __name__ == "__main__":
-    logging.basicConfig(level = logging.DEBUG)
-    build = Build()
-
-    build.add_task('uvw', PrintTask('uvw', 0.0, True), [])
-    build.add_task('abc', PrintTask('abc', 0.0, True), ['def'])
-    build.add_task('def', PrintTask('def', 2.0, True), ['ghi', 'uvw'])
-    build.add_task('ghi', PrintTask('ghi', 0.0, True), ['uvw'])
-
-    build.build('abc', 4)

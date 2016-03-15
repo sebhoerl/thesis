@@ -6,3 +6,4 @@ matsim/
 papers/
 test/
 */latex/build/
+__pycache__

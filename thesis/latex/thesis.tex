@@ -1,10 +1,9 @@
-\documentclass[10pt,a4paper,draft]{report}
+\documentclass[12pt,a4paper,draft]{report}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-\usepackage{graphicx}
-\usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+\usepackage[final]{graphicx}
 \author{Sebastian Hörl}
 \title{Multi-level evaluation of autonomous vehicles using agent-based
 transport simulation for the case of Singapore}
@@ -13,144 +12,13 @@ transport simulation for the case of Singapore}
 
 \tableofcontents
 
-\chapter{Introduction}
+\input{chapters/1.introduction.tex}
+\input{chapters/2.perspectives.tex}
+\input{chapters/3.matsim.tex}
+\input{chapters/4.dynagent.tex}
+\input{chapters/5.basic.tex}
 
-Increasing research and development of autonomous vehicles will have great impact on the future trafic situations in cities. While there are numerous advantages such as expected shorter travel times, less space usage for parking vehicles and more safety, there are still a lot of challenges. This includes policy decisions, infrastructural changes as well as economic considerations. In any case, being able to predict how the introduction of autonomous vehicle in certain usage scenarios and business models would impact the trafic in a city, could give guidelines and suggestions on the implementation process.
-
-In this thesis a hypothetical autonomous taxi service will be implemented in the large-scale agent-based trafic simulation MATSim. The central approach of this simulation framework is the per-person generation of daily plans, the execution in a common day cycle and reconsideration of travel decisions for the next day until every person has reached an acceptable plan. This allows for a couple of interesting investigations, such as to which degree users from different travel modes like private cars or public transport will change towards the taxi service. Also, it can be found out how AV usage is distributed over travel distances or travel times.
-
-To setup such a simulation, careful definition of the AV model has to be undertaken. It is clear that the simulation can only depict reality to a certain degree, this is even more true when one tries to implement means of traffic that are not existant today and therefore lack sensible reference measurements to calibrate. In that sense it needs to be clear, which assumptions have been made and how the choice of different model parameters affects the results in reasonable or plainly unrealistic ways.
-
-\iffalse
-- autonomous vehicles are upcoming and widely recognized (Google, Audi, etc...) [new articles]
-- more and more testing in real world [e.g. Volvo, Keynes, etc.]
-- likely to develop into the service sector [?]
-- how would the new technology shape the traffic situation?
-- maybe existing projections of revenues etc?
-
-- trying to answer the questio nof the traffic situation would change with the new element
-- using agent-based modeling in MATSim, leading to individual decisions, depending on number of parameters
-- necessary to point out which assumptions are made and see the results in context
-- open for improvement in the future
-
-- simulations are done, presented for the corridor case, sioux falls and singapore
-\fi
-
-\chapter{Perspectives on autonomous traffic}
-
-\section{The policy makers}
-
-- policy side: taxes on vehicles, subsidies for real taxi services, etc...
-- complex situation
-- last-mile problem, ...
-- problems like cyber crime, etc. (not covered here)
-
-\section{The taxi company}
-
-%\section{Conventional taxi services}
-
-- interesting economic topic subject to agent-based simulation
-- probably regulation needed, because
-	- special properties of taxi services
-	- like subsidised traffic during nights
-	- not a real ``competitive market''
-
-%\section{Differences with AV services}
-
-- better scheduling possibilities (already used by Uber probably)
-- pre-scheduled trips vs. on-demand
-- simpler cost structure
-
-\section{The customer}
-
-- studies on reception
-- how likely are people to use it?
-- different phases
-- any preferences coming from different transport modes?
-
-\chapter{Modeling framework}
-
-\section{MATSim and DVRP}
-
-- explain MATSim, how the simulation, scoring and selection works
-- explain DVRP contribution and it's advatnages and disadvantages
-
-TODO: References to problems of within-day-replanning, since this is similar... has impact on the nature of the Nash equilibrium
-
-TODO: Mention Only one person per taxi!
-Replannign otherwise quite complex!
-
-\section{Corridor scenario}
-
-- description of the corridor scenario
-- made assumptions
-- baseline results (distribution of modes, etc.)
-
-\chapter{An agent-based model of autonomous taxis}
-
-An agent-based model of an autonomous taxi service can be divided in certain main parts, which are
-
-\begin{itemize}
-\item a distribution model, which defines how available taxis are distributed over the network links at the beginning of the simulation,
-\item a usage model, which defines how agents can interact with the taxi services (i.e. taxi-on-demand or prescheduled pickups) and ,
-\item an allocation algorithm, defining which taxis are allocated to a certain passenger request and
-\item an operator model defining how trips with and without passenger account for the profits of the operator
-\end{itemize}
-
-Derived from those parts there are a couple of parameters that need to be defined:
-
-\begin{itemize}
-\item The number of AVs which are available (i.e. the supply)
-\item Marginal utility of travel, marginal utility of distance (money), constant utility (per-trip)
-\end{itemize}
-
-The biggest issue here is that the utility parameters cannot be tuned as intuitively as for other traffic modes. There usually a statistical distribution of trips and their properties is known. Then parameters are adjusted such that the relaxed state of the simulation is resembling them on the upper level.
-
-For AVs there are at maximum preference studies, describing which percentage of people would be tempted to use a autonomous vehicle.
-
-
-
-
-
-- number of taxis
-- dispatching model
-- marginal utility
-- monetary factor (pricing)
-- per trip, per duration, per distance, ...
-- per car
-
-\section{Marginal utility of traveling}
-
-- how to find a reasonable marginal utility of travel
-- show process for corridor scenario
-- dependent on share of autonomous vehicles -> probably a good measure
-
-\section{Vehicle supply}
-
-- how to infere
-
-\section{Price structure}
-
-- how to infere
-
-
-
-\chapter{Simulation Results}
-
-\section{Sioux Falls}
-
-\section{Singapore}
-
-\section{Usage scenarios}
-
-- last mile problem etc.
-
-\chapter{Conclusion}
-
-%\appendix
-%\chapter{Statistical Inference Procedures}
-%\section{MCMC inference of the marginal utility of travel}
-
-
+\bibliographystyle{abbrv}
+\bibliography{library}
 
 \end{document}
